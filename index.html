@@ -1,0 +1,2940 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-8 이삭줍기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .home-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+            color: #1f2937;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.025em;
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        .category-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .category-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 32px 24px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #3b82f6;
+            transform: scaleY(0);
+            transition: transform 0.2s ease;
+        }
+
+        .category-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            border-color: #3b82f6;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .category-icon {
+            width: 48px;
+            height: 48px;
+            background: #f8fafc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .category-card:hover .category-icon {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .category-card h2 {
+            font-size: 1.25rem;
+            color: #1f2937;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .category-card p {
+            color: #6b7280;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .category-arrow {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            transition: all 0.2s ease;
+        }
+
+        .category-card:hover .category-arrow {
+            color: #3b82f6;
+            transform: translateY(-50%) translateX(4px);
+        }
+
+        .footer {
+            margin-top: 48px;
+            color: #9ca3af;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+
+        /* 페이지 컨테이너 */
+        .page-container {
+            display: none;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f8fafc;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .page-container.active {
+            display: block;
+        }
+
+        /* 상단 네비게이션 */
+        .navbar {
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .home-btn {
+            background: none;
+            border: none;
+            color: #6b7280;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-right: 16px;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .home-btn:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .upload-btn, .add-event-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-btn:hover, .add-event-btn:hover {
+            background: #2563eb;
+        }
+
+        /* 메인 컨테이너 */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* 검색 및 필터 영역 */
+        .filter-section {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .search-container {
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .sort-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .sort-btn {
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            color: #374151;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .sort-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .sort-btn:hover:not(.active) {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        .subject-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .subject-btn {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            color: #6b7280;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .subject-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .subject-btn:hover:not(.active) {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        /* 자료 목록 */
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .material-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+
+        .material-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            border-color: #3b82f6;
+        }
+
+        .material-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .material-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .material-subject {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            opacity: 0.6;
+        }
+
+        .delete-btn:hover {
+            background: #fee2e2;
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .edit-btn {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            opacity: 0.6;
+        }
+
+        .edit-btn:hover {
+            background: #e0f2fe;
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .material-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .material-description {
+            color: #4b5563;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 3px solid #e5e7eb;
+        }
+
+        .material-files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .file-tag {
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-tag:hover {
+            background: #dbeafe;
+        }
+
+        /* 좋아요 및 댓글 섹션 */
+        .material-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .like-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .like-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: 1px solid #d1d5db;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .like-btn:hover {
+            background: #f9fafb;
+            border-color: #3b82f6;
+        }
+
+        .like-btn.liked {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .comment-toggle {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 0.875rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+        }
+
+        .comment-toggle:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .material-date {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            text-align: right;
+        }
+
+        /* 댓글 섹션 */
+        .comments-section {
+            display: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .comments-section.active {
+            display: block;
+        }
+
+        .comment-form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .comment-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            outline: none;
+        }
+
+        .comment-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .comment-submit {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .comment-submit:hover {
+            background: #2563eb;
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .comment-item {
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .comment-author {
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .comment-date {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        .comment-content {
+            color: #4b5563;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 4px;
+        }
+
+        .close-btn:hover {
+            color: #374151;
+        }
+
+        /* 폼 스타일 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-label.required::after {
+            content: ' *';
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input.error, .form-select.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.75rem;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 6px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .file-upload-area:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #9ca3af;
+            margin-bottom: 16px;
+        }
+
+        .upload-text {
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .upload-hint {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        .selected-files {
+            margin-top: 16px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f9fafb;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .file-icon {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 4px;
+        }
+
+        .remove-file:hover {
+            color: #dc2626;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            border: 1px solid #d1d5db;
+            background: white;
+            color: #374151;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .btn-cancel:hover {
+            background: #f9fafb;
+        }
+
+        .btn-submit {
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .btn-submit:hover {
+            background: #2563eb;
+        }
+
+        /* 캘린더 스타일 */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 0 8px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .current-month {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .calendar-day-header {
+            background: #f9fafb;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 500;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .calendar-day {
+            background: white;
+            min-height: 120px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: #f8fafc;
+        }
+
+        .calendar-day.other-month {
+            background: #f9fafb;
+            color: #9ca3af;
+        }
+
+        .calendar-day.today {
+            background: #eff6ff;
+        }
+
+        .day-number {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .calendar-day.other-month .day-number {
+            color: #9ca3af;
+        }
+
+        .calendar-day.today .day-number {
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+
+        .event-item {
+            background: #3b82f6;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-bottom: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .event-item:hover {
+            background: #2563eb;
+        }
+
+        .event-item.school {
+            background: #10b981;
+        }
+
+        .event-item.exam {
+            background: #f59e0b;
+        }
+
+        .event-item.holiday {
+            background: #ef4444;
+        }
+
+        .event-item.class {
+            background: #8b5cf6;
+        }
+
+        .event-item.long-pressed {
+            position: relative;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .event-delete-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            cursor: pointer;
+            z-index: 11;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            animation: deleteButtonPop 0.2s ease-out;
+        }
+
+        .event-delete-btn:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        @keyframes deleteButtonPop {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* 길게 누르기 시각적 피드백 */
+        .event-item {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* 동기화 상태 표시 */
+        .sync-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 3000;
+        }
+
+        .sync-status.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .sync-status.error {
+            background: #ef4444;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .home-page {
+                padding: 24px 16px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .category-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .category-card {
+                padding: 30px 20px;
+            }
+
+            .nav-container {
+                padding: 0 16px;
+            }
+
+            .main-container {
+                padding: 24px 16px;
+            }
+
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .materials-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .subject-filter {
+                justify-content: center;
+            }
+
+            .modal-content {
+                padding: 24px;
+                margin: 16px;
+            }
+
+            .calendar-grid {
+                font-size: 0.875rem;
+            }
+
+            .calendar-day {
+                min-height: 100px;
+                padding: 6px;
+            }
+
+            .current-month {
+                font-size: 1.25rem;
+                min-width: 150px;
+            }
+
+            .comment-form {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .comment-input {
+                border-radius: 6px;
+            }
+
+            .comment-submit {
+                border-radius: 6px;
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 동기화 상태 표시 -->
+    <div id="syncStatus" class="sync-status">
+        <span id="syncText">데이터 동기화됨</span>
+    </div>
+
+    <!-- 홈페이지 -->
+    <div id="homePage" class="home-page">
+        <header class="header">
+            <h1>1-8 이삭줍기</h1>
+            <p>함께 배우고 성장하는 우리 반</p>
+        </header>
+
+        <main class="category-container">
+            <div class="category-card" onclick="navigateToPage('learning')">
+                <div class="category-header">
+                    <div class="category-icon">📚</div>
+                    <h2>학습자료</h2>
+                </div>
+                <p>과목별 학습자료와 미디어 파일을 업로드하고 공유할 수 있습니다</p>
+                <div class="category-arrow">→</div>
+            </div>
+
+            <div class="category-card" onclick="navigateToPage('schedule')">
+                <div class="category-header">
+                    <div class="category-icon">📅</div>
+                    <h2>학사일정</h2>
+                </div>
+                <p>중요한 학사일정과 반 행사 일정을 확인하고 관리할 수 있습니다</p>
+                <div class="category-arrow">→</div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>© 2025 1-8 이삭줍기 | 모든 학생이 함께 만들어가는 공간</p>
+        </footer>
+    </div>
+
+    <!-- 학습자료 페이지 -->
+    <div id="learningPage" class="page-container">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-left">
+                    <button class="home-btn" onclick="navigateToPage('home')">←</button>
+                    <span class="page-title">학습자료</span>
+                </div>
+                <button class="upload-btn" onclick="openUploadModal()">+ 새 자료 업로드</button>
+            </div>
+        </nav>
+
+        <div class="main-container">
+            <div class="filter-section">
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="키워드로 검색..." onkeyup="searchMaterials(this.value)">
+                </div>
+
+                <div class="filter-controls">
+                    <div class="sort-buttons">
+                        <button class="sort-btn active" onclick="sortBy('latest')">최신순</button>
+                        <button class="sort-btn" onclick="sortBy('subject')">과목별</button>
+                        <button class="sort-btn" onclick="sortBy('popular')">인기순</button>
+                    </div>
+
+                    <div class="subject-filter">
+                        <button class="subject-btn active" onclick="filterBySubject('all')">전체</button>
+                        <button class="subject-btn" onclick="filterBySubject('국어')">국어</button>
+                        <button class="subject-btn" onclick="filterBySubject('영어')">영어</button>
+                        <button class="subject-btn" onclick="filterBySubject('수학')">수학</button>
+                        <button class="subject-btn" onclick="filterBySubject('과학')">과학</button>
+                        <button class="subject-btn" onclick="filterBySubject('사회')">사회</button>
+                        <button class="subject-btn" onclick="filterBySubject('정보')">정보</button>
+                        <button class="subject-btn" onclick="filterBySubject('한자')">한자</button>
+                        <button class="subject-btn" onclick="filterBySubject('과탐실')">과탐실</button>
+                        <button class="subject-btn" onclick="filterBySubject('철학')">철학</button>
+                        <button class="subject-btn" onclick="filterBySubject('논술')">논술</button>
+                        <button class="subject-btn" onclick="filterBySubject('음악')">음악</button>
+                        <button class="subject-btn" onclick="filterBySubject('한국사')">한국사</button>
+                        <button class="subject-btn" onclick="filterBySubject('체육')">체육</button>
+                        <button class="subject-btn" onclick="filterBySubject('보건')">보건</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="materials-grid" id="materialsGrid">
+                <!-- 기본 샘플 자료들 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 학사일정 페이지 -->
+    <div id="schedulePage" class="page-container">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-left">
+                    <button class="home-btn" onclick="navigateToPage('home')">←</button>
+                    <span class="page-title">학사일정</span>
+                </div>
+                <button class="add-event-btn" onclick="openEventModal()">+ 일정 추가</button>
+            </div>
+        </nav>
+
+        <div class="main-container">
+            <div class="calendar-header">
+                <div class="calendar-nav">
+                    <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+                    <div class="current-month" id="currentMonth"></div>
+                    <button class="nav-btn" onclick="changeMonth(1)">›</button>
+                </div>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- 캘린더가 여기에 생성됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 파일 업로드 모달 -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">새 자료 업로드</h2>
+                <button class="close-btn" onclick="closeUploadModal()">&times;</button>
+            </div>
+
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label class="form-label">제목 *</label>
+                    <input type="text" class="form-input" id="materialTitle" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">작성자 *</label>
+                    <input type="text" class="form-input" id="materialAuthor" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">과목 *</label>
+                    <select class="form-select" id="materialSubject" required>
+                        <option value="">과목을 선택하세요</option>
+                        <option value="국어">국어</option>
+                        <option value="영어">영어</option>
+                        <option value="수학">수학</option>
+                        <option value="과학">과학</option>
+                        <option value="사회">사회</option>
+                        <option value="정보">정보</option>
+                        <option value="한자">한자</option>
+                        <option value="과탐실">과탐실</option>
+                        <option value="철학">철학</option>
+                        <option value="논술">논술</option>
+                        <option value="음악">음악</option>
+                        <option value="한국사">한국사</option>
+                        <option value="체육">체육</option>
+                        <option value="보건">보건</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">설명</label>
+                    <textarea class="form-textarea" id="materialDescription" placeholder="자료에 대한 설명을 입력하세요"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">파일 첨부</label>
+                    <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('fileInput').click()">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">파일을 선택하거나 여기로 드래그하세요</div>
+                        <div class="upload-hint">PDF, 이미지, 동영상, 문서 파일 등을 업로드할 수 있습니다</div>
+                    </div>
+                    <input type="file" id="fileInput" multiple style="display: none;">
+                    <div id="selectedFiles" class="selected-files"></div>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="button" class="btn-cancel" onclick="closeUploadModal()">취소</button>
+                    <button type="submit" class="btn-submit" id="uploadSubmitBtn">업로드</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 일정 추가 모달 -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">일정 추가</h2>
+                <button class="close-btn" onclick="closeEventModal()">&times;</button>
+            </div>
+
+            <form id="eventForm">
+                <div class="form-group">
+                    <label class="form-label required">일정 제목</label>
+                    <input type="text" class="form-input" id="eventTitle" required placeholder="예: 중간고사, 체육대회, 반 모임">
+                    <div class="error-message" id="eventTitleError">일정 제목을 입력해주세요.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required">날짜</label>
+                    <input type="date" class="form-input" id="eventDate" required>
+                    <div class="error-message" id="eventDateError">날짜를 선택해주세요.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required">카테고리</label>
+                    <select class="form-select" id="eventCategory" required>
+                        <option value="">카테고리를 선택하세요</option>
+                        <option value="school">학교 행사</option>
+                        <option value="exam">시험</option>
+                        <option value="holiday">휴일</option>
+                        <option value="class">반 행사</option>
+                    </select>
+                    <div class="error-message" id="eventCategoryError">카테고리를 선택해주세요.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">설명</label>
+                    <textarea class="form-textarea" id="eventDescription" placeholder="일정에 대한 설명을 입력하세요"></textarea>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="button" class="btn-cancel" onclick="closeEventModal()">취소</button>
+                    <button type="button" class="btn-submit" id="eventSubmitBtn" onclick="handleEventSubmit()">추가</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 로컬 저장소 데이터베이스
+        class LocalDB {
+            constructor() {
+                this.dbName = '1-8-isakjupgi-db';
+                this.testLocalStorage();
+            }
+
+            // localStorage 사용 가능한지 테스트
+            testLocalStorage() {
+                try {
+                    const testKey = 'test-storage';
+                    localStorage.setItem(testKey, 'test');
+                    localStorage.removeItem(testKey);
+                    this.useLocalStorage = true;
+                    console.log('✅ localStorage 사용 가능');
+                } catch (error) {
+                    this.useLocalStorage = false;
+                    console.log('❌ localStorage 사용 불가, 메모리 저장 사용');
+                    window.classDB = window.classDB || {};
+                }
+            }
+
+            // 데이터 저장
+            async save(key, data) {
+                try {
+                    const storageKey = `${this.dbName}-${key}`;
+                    const serializedData = JSON.stringify({
+                        data: data,
+                        timestamp: Date.now(),
+                        version: this.generateVersion()
+                    });
+                    
+                    if (this.useLocalStorage) {
+                        localStorage.setItem(storageKey, serializedData);
+                    } else {
+                        window.classDB[storageKey] = serializedData;
+                    }
+                    
+                    // 서버 동기화 시뮬레이션
+                    await this.syncToServer(key, data);
+                    
+                    showSyncStatus('데이터 저장됨', 'success');
+                    return true;
+                } catch (error) {
+                    console.error('데이터 저장 실패:', error);
+                    showSyncStatus('저장 실패', 'error');
+                    return false;
+                }
+            }
+
+            // 데이터 로드
+            async load(key) {
+                try {
+                    const storageKey = `${this.dbName}-${key}`;
+                    let stored = null;
+                    
+                    if (this.useLocalStorage) {
+                        stored = localStorage.getItem(storageKey);
+                    } else {
+                        window.classDB = window.classDB || {};
+                        stored = window.classDB[storageKey];
+                    }
+                    
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        console.log(`📁 ${key} 데이터 로드됨:`, parsed.data?.length || 'N/A', '개 항목');
+                        return parsed.data;
+                    }
+                    
+                    console.log(`🔭 ${key} 데이터 없음`);
+                    return null;
+                } catch (error) {
+                    console.error('데이터 로드 실패:', error);
+                    return null;
+                }
+            }
+
+            // 서버 동기화 시뮬레이션
+            async syncToServer(key, data) {
+                return new Promise((resolve) => {
+                    // 네트워크 지연 시뮬레이션
+                    setTimeout(() => {
+                        console.log(`🌍 [서버 동기화] ${key} 데이터가 모든 사용자에게 동기화되었습니다.`);
+                        resolve(true);
+                    }, 500);
+                });
+            }
+
+            generateVersion() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+
+            // 실시간 동기화 (localStorage 변경 감지)
+            async startRealTimeSync() {
+                // localStorage 변경 감지 (다른 탭에서의 변경사항)
+                if (this.useLocalStorage) {
+                    window.addEventListener('storage', (e) => {
+                        if (e.key && e.key.startsWith(this.dbName)) {
+                            console.log('🔄 다른 탭에서 데이터 변경 감지됨');
+                            showSyncStatus('다른 탭에서 업데이트됨', 'success');
+                            this.refreshCurrentPage();
+                        }
+                    });
+                }
+                
+                // 주기적 동기화 시뮬레이션
+                setInterval(async () => {
+                    // 실제로는 서버와 동기화
+                    console.log('🔄 주기적 동기화 체크...');
+                }, 30000); // 30초마다 확인
+            }
+
+            async refreshCurrentPage() {
+                await loadAllData();
+                if (document.getElementById('learningPage').classList.contains('active')) {
+                    renderMaterials();
+                    filterAndSort();
+                }
+                if (document.getElementById('schedulePage').classList.contains('active')) {
+                    renderCalendar();
+                }
+            }
+
+            // 모든 데이터 삭제 (디버깅용)
+            clearAllData() {
+                const keys = ['materials', 'events', 'comments', 'likedMaterials'];
+                keys.forEach(key => {
+                    const storageKey = `${this.dbName}-${key}`;
+                    if (this.useLocalStorage) {
+                        localStorage.removeItem(storageKey);
+                    } else {
+                        delete window.classDB[storageKey];
+                    }
+                });
+                console.log('🗑️ 모든 데이터 삭제됨');
+                showSyncStatus('데이터 초기화됨', 'success');
+            }
+        }
+
+        // 전역 변수
+        let db = new LocalDB();
+        let materials = [];
+        let events = [];
+        let comments = [];
+        let selectedFiles = [];
+        let currentSort = 'latest';
+        let currentSubject = 'all';
+        let currentSearch = '';
+        let currentDate = new Date();
+        let likedMaterials = [];
+
+        // 동기화 상태 표시
+        function showSyncStatus(message, type = 'success') {
+            const statusEl = document.getElementById('syncStatus');
+            const textEl = document.getElementById('syncText');
+            
+            textEl.textContent = message;
+            statusEl.className = `sync-status show ${type}`;
+            
+            setTimeout(() => {
+                statusEl.classList.remove('show');
+            }, 3000);
+        }
+
+        // 폼 유효성 검사 함수 (디버깅 강화)
+        function validateEventForm() {
+            const titleElement = document.getElementById('eventTitle');
+            const dateElement = document.getElementById('eventDate');
+            const categoryElement = document.getElementById('eventCategory');
+            
+            const title = titleElement.value.trim();
+            const date = dateElement.value;
+            const category = categoryElement.value;
+            
+            console.log('🔍 폼 유효성 검사:', {
+                title: `"${title}"`,
+                date: `"${date}"`, 
+                category: `"${category}"`,
+                titleLength: title.length,
+                titleRaw: titleElement.value
+            });
+            
+            let isValid = true;
+            
+            // 에러 상태 초기화
+            clearEventFormErrors();
+            
+            // 제목 검증
+            if (!title || title.length === 0) {
+                console.log('❌ 제목 유효성 검사 실패');
+                showFieldError('eventTitle', 'eventTitleError');
+                isValid = false;
+            }
+            
+            // 날짜 검증
+            if (!date) {
+                console.log('❌ 날짜 유효성 검사 실패');
+                showFieldError('eventDate', 'eventDateError');
+                isValid = false;
+            }
+            
+            // 카테고리 검증
+            if (!category) {
+                console.log('❌ 카테고리 유효성 검사 실패');
+                showFieldError('eventCategory', 'eventCategoryError');
+                isValid = false;
+            }
+            
+            console.log('✅ 유효성 검사 결과:', isValid);
+            return isValid;
+        }
+
+        function showFieldError(fieldId, errorId) {
+            const field = document.getElementById(fieldId);
+            const error = document.getElementById(errorId);
+            
+            field.classList.add('error');
+            error.classList.add('show');
+        }
+
+        function clearEventFormErrors() {
+            const fields = ['eventTitle', 'eventDate', 'eventCategory'];
+            const errors = ['eventTitleError', 'eventDateError', 'eventCategoryError'];
+            
+            fields.forEach(fieldId => {
+                document.getElementById(fieldId).classList.remove('error');
+            });
+            
+            errors.forEach(errorId => {
+                document.getElementById(errorId).classList.remove('show');
+            });
+        }
+
+        // 데이터 저장
+        async function saveData() {
+            try {
+                console.log('💾 데이터 저장 시작...');
+                const results = await Promise.all([
+                    db.save('materials', materials),
+                    db.save('events', events),
+                    db.save('comments', comments),
+                    db.save('likedMaterials', likedMaterials)
+                ]);
+                
+                const allSuccess = results.every(result => result === true);
+                console.log('💾 저장 결과:', allSuccess ? '성공' : '실패');
+                return allSuccess;
+            } catch (error) {
+                console.error('❌ 데이터 저장 중 오류:', error);
+                return false;
+            }
+        }
+
+        // 데이터 로드
+        async function loadAllData() {
+            try {
+                console.log('📂 데이터 로드 시작...');
+                
+                const loadedMaterials = await db.load('materials');
+                const loadedEvents = await db.load('events');
+                const loadedComments = await db.load('comments');
+                const loadedLikes = await db.load('likedMaterials');
+
+                let hasData = false;
+
+                if (loadedMaterials && loadedMaterials.length > 0) {
+                    materials = loadedMaterials;
+                    hasData = true;
+                }
+                
+                if (loadedEvents && loadedEvents.length > 0) {
+                    events = loadedEvents;
+                    hasData = true;
+                }
+                
+                if (loadedComments && loadedComments.length > 0) {
+                    comments = loadedComments;
+                    hasData = true;
+                }
+                
+                if (loadedLikes && loadedLikes.length > 0) {
+                    likedMaterials = loadedLikes;
+                    hasData = true;
+                }
+
+                console.log('📊 로드된 데이터:', {
+                    materials: materials.length,
+                    events: events.length,
+                    comments: comments.length,
+                    likes: likedMaterials.length,
+                    hasExistingData: hasData
+                });
+
+                return hasData;
+            } catch (error) {
+                console.error('❌ 데이터 로드 실패:', error);
+                return false;
+            }
+        }
+
+        // 샘플 데이터 초기화 (첫 사용자용)
+        function initSampleData() {
+            if (materials.length === 0) {
+                materials = [
+                    {
+                        id: 1,
+                        title: "삼각함수 정리 노트",
+                        author: "김민준",
+                        subject: "수학",
+                        description: "삼각함수의 기본 공식들과 그래프 특성을 정리한 자료입니다. 시험 준비에 도움이 될 것 같아요!",
+                        files: [
+                            { name: "삼각함수_공식.pdf", type: "pdf" },
+                            { name: "그래프_예시.jpg", type: "image" }
+                        ],
+                        date: "2025-07-30",
+                        likes: 12,
+                        comments: 3
+                    },
+                    {
+                        id: 2,
+                        title: "영어 단어 암기법",
+                        author: "이서연",
+                        subject: "영어",
+                        description: "효과적인 영어 단어 암기 방법을 영상으로 설명했습니다. 연상법과 어근 활용법 중심으로 다뤘어요.",
+                        files: [
+                            { name: "암기법_설명.mp4", type: "video" },
+                            { name: "단어장.docx", type: "document" }
+                        ],
+                        date: "2025-07-29",
+                        likes: 8,
+                        comments: 5
+                    },
+                    {
+                        id: 3,
+                        title: "화학 실험 보고서",
+                        author: "박준형",
+                        subject: "과학",
+                        description: "산과 염기의 중화반응 실험 결과를 정리한 보고서입니다. 실험 과정 사진도 포함되어 있어요.",
+                        files: [
+                            { name: "실험보고서.pdf", type: "pdf" },
+                            { name: "실험사진.jpg", type: "image" }
+                        ],
+                        date: "2025-07-28",
+                        likes: 15,
+                        comments: 2
+                    },
+                    {
+                        id: 4,
+                        title: "문학 작품 분석",
+                        author: "최유진",
+                        subject: "국어",
+                        description: "윤동주의 '서시' 작품을 화자, 상황, 정서, 표현 기법 등으로 나누어 분석한 자료입니다.",
+                        files: [
+                            { name: "작품분석.hwp", type: "document" }
+                        ],
+                        date: "2025-07-27",
+                        likes: 6,
+                        comments: 1
+                    },
+                    {
+                        id: 5,
+                        title: "올바른 손 씻기 방법",
+                        author: "정하늘",
+                        subject: "보건",
+                        description: "감염병 예방을 위한 올바른 손 씻기 6단계를 영상으로 시연하고, 보건 수칙도 함께 정리했습니다.",
+                        files: [
+                            { name: "손씻기_시연.mp4", type: "video" },
+                            { name: "보건수칙.pdf", type: "pdf" }
+                        ],
+                        date: "2025-07-26",
+                        likes: 9,
+                        comments: 4
+                    }
+                ];
+            }
+
+            if (events.length === 0) {
+                events = [
+                    {
+                        id: 1,
+                        title: "중간고사",
+                        date: "2025-08-25",
+                        category: "exam",
+                        description: "1학기 중간고사"
+                    },
+                    {
+                        id: 2,
+                        title: "체육대회",
+                        date: "2025-09-05",
+                        category: "school",
+                        description: "전교 체육대회"
+                    },
+                    {
+                        id: 3,
+                        title: "반 회식",
+                        date: "2025-09-15",
+                        category: "class",
+                        description: "1-8반 반 회식"
+                    }
+                ];
+            }
+
+            if (comments.length === 0) {
+                comments = [
+                    { id: 1, materialId: 1, author: "이서연", content: "정말 유용한 자료네요! 감사합니다 👍", date: "2025-07-30 15:30" },
+                    { id: 2, materialId: 1, author: "박준형", content: "시험 준비에 도움이 될 것 같아요", date: "2025-07-30 16:20" },
+                    { id: 3, materialId: 1, author: "최유진", content: "그래프 해석 부분이 특히 좋네요!", date: "2025-07-30 18:45" },
+                    { id: 4, materialId: 2, author: "김민준", content: "암기법 영상 정말 도움됐어요!", date: "2025-07-29 14:15" },
+                    { id: 5, materialId: 2, author: "정하늘", content: "연상법 활용해서 단어 외워볼게요", date: "2025-07-29 19:30" }
+                ];
+            }
+        }
+
+        // 페이지 네비게이션
+        function navigateToPage(page) {
+            document.querySelectorAll('.page-container, .home-page').forEach(p => {
+                p.style.display = 'none';
+                p.classList.remove('active');
+            });
+
+            if (page === 'home') {
+                document.getElementById('homePage').style.display = 'flex';
+            } else if (page === 'learning') {
+                document.getElementById('learningPage').style.display = 'block';
+                document.getElementById('learningPage').classList.add('active');
+                setTimeout(() => {
+                    renderMaterials();
+                    filterAndSort();
+                }, 100);
+            } else if (page === 'schedule') {
+                document.getElementById('schedulePage').style.display = 'block';
+                document.getElementById('schedulePage').classList.add('active');
+                setTimeout(() => {
+                    renderCalendar();
+                }, 100);
+            }
+        }
+
+        // 파일 아이콘 가져오기
+        function getFileIcon(type) {
+            const icons = {
+                pdf: '📄',
+                image: '📷',
+                video: '🎥',
+                document: '📄',
+                audio: '🎵',
+                default: '📎'
+            };
+            return icons[type] || icons.default;
+        }
+
+        // 자료 목록 렌더링
+        function renderMaterials() {
+            const grid = document.getElementById('materialsGrid');
+            if (!grid) {
+                console.error('❌ materialsGrid 요소를 찾을 수 없습니다.');
+                return;
+            }
+            
+            console.log('🎨 자료 목록 렌더링 시작:', materials.length, '개');
+            grid.innerHTML = '';
+
+            if (materials.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #6b7280;">
+                        <div style="font-size: 3rem; margin-bottom: 16px;">📚</div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 8px; color: #374151;">아직 업로드된 자료가 없습니다</h3>
+                        <p style="font-size: 0.875rem;">첫 번째 학습자료를 업로드해보세요!</p>
+                        <button onclick="openUploadModal()" style="margin-top: 16px; background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">+ 자료 업로드</button>
+                    </div>
+                `;
+                return;
+            }
+
+            materials.forEach((material, index) => {
+                const card = document.createElement('div');
+                card.className = 'material-card';
+                card.dataset.subject = material.subject;
+                card.dataset.date = material.date;
+                card.dataset.likes = material.likes;
+
+                const filesHtml = material.files && material.files.length > 0 ? 
+                    material.files.map(file => 
+                        `<span class="file-tag" onclick="downloadFile('${file.name}')">${getFileIcon(file.type)} ${file.name}</span>`
+                    ).join('') : 
+                    '<span style="color: #9ca3af; font-size: 0.75rem;">첨부파일 없음</span>';
+
+                const isLiked = likedMaterials.includes(material.id);
+                const materialComments = comments.filter(c => c.materialId === material.id);
+
+                card.innerHTML = `
+                    <div class="material-header">
+                        <div>
+                            <div class="material-title">${material.title}</div>
+                            <div class="material-meta">
+                                <span>작성자: ${material.author}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span class="material-subject">${material.subject}</span>
+                            <button class="edit-btn" onclick="editMaterial(${material.id})" title="자료 수정">
+                                ✏️
+                            </button>
+                            <button class="delete-btn" onclick="deleteMaterial(${material.id})" title="자료 삭제">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                    <div class="material-description">
+                        ${material.description}
+                    </div>
+                    <div class="material-files">
+                        ${filesHtml}
+                    </div>
+                    <div class="material-actions">
+                        <div class="like-section">
+                            <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike(${material.id})">
+                                <span>${isLiked ? '❤️' : '🤍'}</span>
+                                <span>${material.likes}</span>
+                            </button>
+                        </div>
+                        <button class="comment-toggle" onclick="toggleComments(${material.id})">
+                            💬 ${materialComments.length}개
+                        </button>
+                    </div>
+                    <div class="material-date">${material.date.replace(/-/g, '.')}</div>
+                    
+                    <div class="comments-section" id="comments-${material.id}">
+                        <div class="comment-form">
+                            <input type="text" class="comment-input" placeholder="댓글을 입력하세요..." onkeypress="handleCommentKeyPress(event, ${material.id})">
+                            <button class="comment-submit" onclick="addComment(${material.id})">등록</button>
+                        </div>
+                        <div class="comments-list" id="comments-list-${material.id}">
+                            ${renderCommentsForMaterial(material.id)}
+                        </div>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+            
+            console.log('✅ 자료 목록 렌더링 완료:', materials.length, '개');
+        }
+
+        // 자료별 댓글 렌더링
+        function renderCommentsForMaterial(materialId) {
+            const materialComments = comments.filter(c => c.materialId === materialId);
+            return materialComments.map(comment => `
+                <div class="comment-item">
+                    <div class="comment-header">
+                        <span class="comment-author">${comment.author}</span>
+                        <span class="comment-date">${comment.date}</span>
+                    </div>
+                    <div class="comment-content">${comment.content}</div>
+                </div>
+            `).join('');
+        }
+
+        // 좋아요 토글
+        async function toggleLike(materialId) {
+            const material = materials.find(m => m.id === materialId);
+            const isLiked = likedMaterials.includes(materialId);
+
+            if (isLiked) {
+                likedMaterials = likedMaterials.filter(id => id !== materialId);
+                material.likes--;
+            } else {
+                likedMaterials.push(materialId);
+                material.likes++;
+            }
+
+            await saveData();
+            renderMaterials();
+            filterAndSort();
+        }
+
+        // 댓글 섹션 토글
+        function toggleComments(materialId) {
+            const commentsSection = document.getElementById(`comments-${materialId}`);
+            commentsSection.classList.toggle('active');
+        }
+
+        // 댓글 추가
+        async function addComment(materialId) {
+            const input = document.querySelector(`#comments-${materialId} .comment-input`);
+            const content = input.value.trim();
+            
+            if (!content) return;
+
+            const newComment = {
+                id: Date.now(), // 고유 ID 생성
+                materialId: materialId,
+                author: "나", // 실제로는 로그인한 사용자명
+                content: content,
+                date: new Date().toLocaleString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }).replace(/\. /g, '-').replace(/\.$/, '').replace(' ', ' ')
+            };
+
+            comments.push(newComment);
+
+            // 댓글 수 증가
+            const material = materials.find(m => m.id === materialId);
+            material.comments++;
+
+            input.value = '';
+            
+            await saveData();
+            
+            // 댓글 목록 업데이트
+            const commentsList = document.getElementById(`comments-list-${materialId}`);
+            commentsList.innerHTML = renderCommentsForMaterial(materialId);
+
+            // 카드 새로고침
+            renderMaterials();
+            filterAndSort();
+            
+            // 댓글 섹션 열기
+            document.getElementById(`comments-${materialId}`).classList.add('active');
+        }
+
+        // 엔터키로 댓글 추가
+        function handleCommentKeyPress(event, materialId) {
+            if (event.key === 'Enter') {
+                addComment(materialId);
+            }
+        }
+
+        // 파일 다운로드 (시뮬레이션)
+        function downloadFile(filename) {
+            alert(`"${filename}" 파일을 다운로드합니다.`);
+        }
+
+        // 학습자료 삭제 함수 (확인 없이 바로 삭제)
+        async function deleteMaterial(materialId) {
+            try {
+                // 삭제할 자료 찾기
+                const material = materials.find(m => m.id === materialId);
+                if (!material) {
+                    alert('삭제할 자료를 찾을 수 없습니다.');
+                    return;
+                }
+                
+                console.log('🗑️ 자료 삭제 시작:', materialId, material.title);
+                
+                // 자료 배열에서 제거
+                const materialIndex = materials.findIndex(m => m.id === materialId);
+                materials.splice(materialIndex, 1);
+                console.log('✅ 자료 배열에서 제거됨. 남은 자료 수:', materials.length);
+                
+                // 관련 댓글들도 삭제
+                const originalCommentsCount = comments.length;
+                comments = comments.filter(c => c.materialId !== materialId);
+                const deletedCommentsCount = originalCommentsCount - comments.length;
+                console.log(`🗑️ 관련 댓글 ${deletedCommentsCount}개 삭제됨`);
+                
+                // 좋아요 목록에서도 제거
+                likedMaterials = likedMaterials.filter(id => id !== materialId);
+                console.log('🗑️ 좋아요 목록에서 제거됨');
+                
+                // 데이터 저장
+                await saveData();
+                console.log('💾 데이터 저장 완료');
+                
+                // 화면 새로고침
+                if (document.getElementById('learningPage').classList.contains('active')) {
+                    renderMaterials();
+                    filterAndSort();
+                }
+                
+                showSyncStatus(`"${material.title}" 삭제됨`, 'success');
+                console.log('🎉 자료 삭제 완료!');
+                
+            } catch (error) {
+                console.error('❌ 자료 삭제 중 오류:', error);
+                alert('자료 삭제 중 오류가 발생했습니다: ' + error.message);
+                showSyncStatus('자료 삭제 실패', 'error');
+            }
+        }
+
+        // 학습자료 수정 함수
+        function editMaterial(materialId) {
+            const material = materials.find(m => m.id === materialId);
+            if (!material) {
+                alert('수정할 자료를 찾을 수 없습니다.');
+                return;
+            }
+            
+            console.log('✏️ 자료 수정 시작:', material);
+            
+            // 전역 변수로 현재 수정 중인 자료 ID 저장
+            window.editingMaterialId = materialId;
+            
+            // 업로드 모달을 수정 모드로 열기
+            document.getElementById('uploadModal').classList.add('active');
+            
+            // 모달 제목 변경
+            document.querySelector('#uploadModal .modal-title').textContent = '자료 수정';
+            document.getElementById('uploadSubmitBtn').textContent = '수정 완료';
+            
+            // 기존 데이터를 폼에 채우기
+            document.getElementById('materialTitle').value = material.title;
+            document.getElementById('materialAuthor').value = material.author;
+            document.getElementById('materialSubject').value = material.subject;
+            document.getElementById('materialDescription').value = material.description;
+            
+            // 기존 파일 정보 표시 (실제 파일은 없으니 정보만)
+            const filesContainer = document.getElementById('selectedFiles');
+            filesContainer.innerHTML = '';
+            
+            if (material.files && material.files.length > 0) {
+                material.files.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <div class="file-info">
+                            <span class="file-icon">${getFileIcon(file.type)}</span>
+                            <span>${file.name} (기존 파일)</span>
+                        </div>
+                    `;
+                    filesContainer.appendChild(fileItem);
+                });
+            }
+            
+            selectedFiles = []; // 새로 선택된 파일은 초기화
+        }
+
+        // 정렬 및 필터링
+        function sortBy(type) {
+            currentSort = type;
+            
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (type === 'latest') {
+                currentSubject = 'all';
+                document.querySelectorAll('.subject-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('.subject-btn[onclick="filterBySubject(\'all\')"]').classList.add('active');
+            }
+
+            filterAndSort();
+        }
+
+        function filterBySubject(subject) {
+            currentSubject = subject;
+            
+            document.querySelectorAll('.subject-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            filterAndSort();
+        }
+
+        function searchMaterials(keyword) {
+            currentSearch = keyword.toLowerCase();
+            filterAndSort();
+        }
+
+        function filterAndSort() {
+            const cards = Array.from(document.querySelectorAll('.material-card'));
+            
+            cards.forEach(card => {
+                const subject = card.dataset.subject;
+                const title = card.querySelector('.material-title').textContent.toLowerCase();
+                const author = card.querySelector('.material-meta span').textContent.toLowerCase();
+                
+                const subjectMatch = currentSubject === 'all' || subject === currentSubject;
+                const searchMatch = currentSearch === '' || 
+                    title.includes(currentSearch) || 
+                    author.includes(currentSearch) ||
+                    subject.toLowerCase().includes(currentSearch);
+                
+                if (subjectMatch && searchMatch) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const visibleCards = cards.filter(card => card.style.display !== 'none');
+            const grid = document.getElementById('materialsGrid');
+            
+            if (currentSort === 'latest') {
+                visibleCards.sort((a, b) => new Date(b.dataset.date) - new Date(a.dataset.date));
+            } else if (currentSort === 'subject') {
+                visibleCards.sort((a, b) => {
+                    const subjectA = a.dataset.subject;
+                    const subjectB = b.dataset.subject;
+                    if (subjectA === subjectB) {
+                        return new Date(b.dataset.date) - new Date(a.dataset.date);
+                    }
+                    return subjectA.localeCompare(subjectB);
+                });
+            } else if (currentSort === 'popular') {
+                visibleCards.sort((a, b) => parseInt(b.dataset.likes) - parseInt(a.dataset.likes));
+            }
+
+            visibleCards.forEach(card => grid.appendChild(card));
+        }
+
+        // 파일 업로드 모달
+        function openUploadModal() {
+            console.log('📂 업로드 모달 열기');
+            document.getElementById('uploadModal').classList.add('active');
+            resetUploadForm();
+        }
+
+        function closeUploadModal() {
+            console.log('📂 업로드 모달 닫기');
+            document.getElementById('uploadModal').classList.remove('active');
+            resetUploadForm();
+            
+            // 수정 모드 해제
+            window.editingMaterialId = null;
+            document.querySelector('#uploadModal .modal-title').textContent = '새 자료 업로드';
+            document.getElementById('uploadSubmitBtn').textContent = '업로드';
+        }
+
+        function resetUploadForm() {
+            console.log('🔄 업로드 폼 초기화');
+            const form = document.getElementById('uploadForm');
+            if (form) {
+                form.reset();
+            }
+            selectedFiles = [];
+            updateSelectedFilesDisplay();
+        }
+
+        // 파일 선택 처리
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            selectedFiles = [...selectedFiles, ...files];
+            updateSelectedFilesDisplay();
+        }
+
+        function updateSelectedFilesDisplay() {
+            const container = document.getElementById('selectedFiles');
+            container.innerHTML = '';
+
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileType = getFileTypeFromName(file.name);
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <span class="file-icon">${getFileIcon(fileType)}</span>
+                        <span>${file.name}</span>
+                    </div>
+                    <button type="button" class="remove-file" onclick="removeFile(${index})">×</button>
+                `;
+                
+                container.appendChild(fileItem);
+            });
+        }
+
+        function getFileTypeFromName(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const types = {
+                'pdf': 'pdf',
+                'jpg': 'image', 'jpeg': 'image', 'png': 'image', 'gif': 'image',
+                'mp4': 'video', 'avi': 'video', 'mov': 'video',
+                'mp3': 'audio', 'wav': 'audio',
+                'doc': 'document', 'docx': 'document', 'hwp': 'document'
+            };
+            return types[ext] || 'default';
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateSelectedFilesDisplay();
+        }
+
+        // 드래그 앤 드롭 처리
+        function initFileUpload() {
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            
+            if (fileUploadArea) {
+                console.log('📁 파일 업로드 영역 초기화');
+                
+                fileUploadArea.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('dragover');
+                });
+
+                fileUploadArea.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                });
+
+                fileUploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                    
+                    const files = Array.from(e.dataTransfer.files);
+                    console.log('📁 드래그 앤 드롭으로 파일 추가됨:', files.length, '개');
+                    selectedFiles = [...selectedFiles, ...files];
+                    updateSelectedFilesDisplay();
+                });
+                
+                // 파일 입력 클릭 이벤트도 추가
+                const fileInput = document.getElementById('fileInput');
+                if (fileInput) {
+                    fileInput.addEventListener('change', handleFileSelect);
+                    console.log('📁 파일 입력 이벤트 등록됨');
+                }
+            } else {
+                console.error('❌ 파일 업로드 영역을 찾을 수 없습니다.');
+            }
+        }
+
+        // 업로드 폼 제출
+        function initUploadForm() {
+            const uploadForm = document.getElementById('uploadForm');
+            const submitBtn = document.getElementById('uploadSubmitBtn');
+            
+            if (!uploadForm) {
+                console.error('❌ 업로드 폼을 찾을 수 없습니다.');
+                return;
+            }
+            
+            console.log('🔧 업로드 폼 초기화 중...');
+            
+            // 기존 이벤트 리스너 제거 (중복 방지)
+            uploadForm.removeEventListener('submit', handleUploadSubmit);
+            
+            // 폼 제출 이벤트 등록
+            uploadForm.addEventListener('submit', handleUploadSubmit);
+            
+            // 버튼 클릭 이벤트도 별도로 등록 (더블 체크)
+            if (submitBtn) {
+                submitBtn.removeEventListener('click', handleUploadClick);
+                submitBtn.addEventListener('click', handleUploadClick);
+                console.log('✅ 업로드 버튼 이벤트 등록됨');
+            }
+            
+            console.log('✅ 업로드 폼 초기화 완료');
+        }
+
+        // 업로드 버튼 클릭 핸들러
+        function handleUploadClick(e) {
+            console.log('🖱️ 업로드 버튼 클릭됨');
+            
+            // 버튼이 submit 타입이면 폼 제출이 자동으로 발생
+            // 만약 submit 이벤트가 작동하지 않으면 직접 처리
+            const form = document.getElementById('uploadForm');
+            if (form) {
+                e.preventDefault();
+                handleUploadSubmit(e);
+            }
+        }
+
+        // 업로드 폼 제출 핸들러 (수정 모드 지원)
+        async function handleUploadSubmit(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const isEditMode = window.editingMaterialId != null;
+            console.log(isEditMode ? '✏️ 자료 수정 제출 시작...' : '🚀 새 자료 업로드 제출 시작...');
+            
+            try {
+                const title = document.getElementById('materialTitle').value.trim();
+                const author = document.getElementById('materialAuthor').value.trim();
+                const subject = document.getElementById('materialSubject').value;
+                const description = document.getElementById('materialDescription').value.trim();
+                
+                console.log('📝 폼 데이터 확인:', { 
+                    title: title || '(비어있음)', 
+                    author: author || '(비어있음)', 
+                    subject: subject || '(선택안됨)', 
+                    description: description || '(비어있음)',
+                    fileCount: selectedFiles.length,
+                    isEditMode: isEditMode
+                });
+                
+                // 필수 항목 검증
+                if (!title) {
+                    alert('제목을 입력해주세요.');
+                    document.getElementById('materialTitle').focus();
+                    return;
+                }
+                
+                if (!author) {
+                    alert('작성자를 입력해주세요.');
+                    document.getElementById('materialAuthor').focus();
+                    return;
+                }
+                
+                if (!subject) {
+                    alert('과목을 선택해주세요.');
+                    document.getElementById('materialSubject').focus();
+                    return;
+                }
+                
+                console.log('✅ 필수 항목 검증 통과');
+                
+                if (isEditMode) {
+                    // 수정 모드
+                    const materialIndex = materials.findIndex(m => m.id === window.editingMaterialId);
+                    if (materialIndex === -1) {
+                        alert('수정할 자료를 찾을 수 없습니다.');
+                        return;
+                    }
+                    
+                    const existingMaterial = materials[materialIndex];
+                    console.log('📝 기존 자료:', existingMaterial);
+                    
+                    // 기존 자료 업데이트
+                    materials[materialIndex] = {
+                        ...existingMaterial,
+                        title: title,
+                        author: author,
+                        subject: subject,
+                        description: description || `${subject} 과목 학습자료입니다.`,
+                        // 새 파일이 선택되었으면 교체, 아니면 기존 파일 유지
+                        files: selectedFiles.length > 0 ? 
+                            selectedFiles.map(file => ({
+                                name: file.name,
+                                type: getFileTypeFromName(file.name),
+                                size: file.size
+                            })) : existingMaterial.files
+                    };
+                    
+                    console.log('✏️ 자료 수정 완료:', materials[materialIndex]);
+                    showSyncStatus('자료 수정 중...', 'success');
+                    
+                } else {
+                    // 새 자료 추가 모드
+                    const newMaterial = {
+                        id: Date.now(),
+                        title: title,
+                        author: author,
+                        subject: subject,
+                        description: description || `${subject} 과목 학습자료입니다.`,
+                        files: selectedFiles.map(file => ({
+                            name: file.name,
+                            type: getFileTypeFromName(file.name),
+                            size: file.size
+                        })),
+                        date: new Date().toISOString().split('T')[0],
+                        likes: 0,
+                        comments: 0
+                    };
+                    
+                    console.log('✨ 새 자료 생성됨:', newMaterial);
+                    materials.unshift(newMaterial);
+                    showSyncStatus('자료 업로드 중...', 'success');
+                }
+                
+                console.log('📚 자료 배열 업데이트됨. 총 자료 수:', materials.length);
+                
+                // 데이터 저장
+                const saveResult = await saveData();
+                
+                if (saveResult) {
+                    console.log('💾 데이터 저장 성공');
+                    
+                    // 모달 닫기
+                    closeUploadModal();
+                    
+                    // 화면 업데이트
+                    if (document.getElementById('learningPage').classList.contains('active')) {
+                        console.log('🔄 화면 업데이트 중...');
+                        renderMaterials();
+                        filterAndSort();
+                    }
+                    
+                    const action = isEditMode ? '수정' : '업로드';
+                    console.log(`🎉 자료 ${action} 완료!`);
+                    showSyncStatus(`자료 ${action} 완료! 🎉`, 'success');
+                    
+                    // 성공 메시지
+                    setTimeout(() => {
+                        alert(`"${title}" 자료가 성공적으로 ${action}되었습니다!\n총 ${materials.length}개의 자료가 있습니다. 📚`);
+                    }, 500);
+                } else {
+                    console.error('❌ 데이터 저장 실패');
+                    alert('처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+                }
+                
+            } catch (error) {
+                console.error('❌ 처리 중 오류:', error);
+                alert('처리 중 오류가 발생했습니다: ' + error.message);
+                showSyncStatus('처리 실패', 'error');
+            }
+        }
+
+        // 캘린더 렌더링
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthNames = [
+                '1월', '2월', '3월', '4월', '5월', '6월',
+                '7월', '8월', '9월', '10월', '11월', '12월'
+            ];
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            
+            // 전체 화면 클릭 시 삭제 버튼 숨기기
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.event-item') && !e.target.closest('.event-delete-btn')) {
+                    hideDeleteButton();
+                }
+            });
+            
+            // 현재 월 표시
+            document.getElementById('currentMonth').textContent = 
+                `${currentDate.getFullYear()}년 ${monthNames[currentDate.getMonth()]}`;
+            
+            // 캘린더 그리드 초기화
+            grid.innerHTML = '';
+            
+            // 요일 헤더 추가
+            dayNames.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+            
+            // 달력 날짜 계산
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startDay = firstDay.getDay();
+            
+            // 이전 달의 마지막 날들
+            const prevMonth = new Date(year, month - 1, 0);
+            for (let i = startDay - 1; i >= 0; i--) {
+                const day = prevMonth.getDate() - i;
+                const dayElement = createDayElement(day, true, false);
+                grid.appendChild(dayElement);
+            }
+            
+            // 현재 달의 날들
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isToday = year === today.getFullYear() && 
+                               month === today.getMonth() && 
+                               day === today.getDate();
+                const dayElement = createDayElement(day, false, isToday);
+                grid.appendChild(dayElement);
+            }
+            
+            // 다음 달의 첫 날들
+            const remainingCells = 42 - (startDay + daysInMonth);
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayElement = createDayElement(day, true, false);
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function createDayElement(day, otherMonth, isToday) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'calendar-day';
+            
+            if (otherMonth) {
+                dayElement.classList.add('other-month');
+            }
+            if (isToday) {
+                dayElement.classList.add('today');
+            }
+            
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = day;
+            dayElement.appendChild(dayNumber);
+            
+            // 해당 날짜의 이벤트 추가
+            if (!otherMonth) {
+                const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayEvents = events.filter(event => event.date === dateStr);
+                
+                dayEvents.forEach(event => {
+                    const eventElement = document.createElement('div');
+                    eventElement.className = `event-item ${event.category}`;
+                    eventElement.textContent = event.title;
+                    
+                    // 일반 클릭 이벤트 (수정)
+                    eventElement.onclick = (e) => {
+                        if (!isLongPress) {
+                            showEventDetails(event);
+                        }
+                        isLongPress = false; // 리셋
+                    };
+                    
+                    // 길게 누르기 이벤트들
+                    eventElement.onmousedown = (e) => {
+                        e.preventDefault();
+                        startLongPress(eventElement, event);
+                    };
+                    
+                    eventElement.onmouseup = () => {
+                        cancelLongPress();
+                    };
+                    
+                    eventElement.onmouseleave = () => {
+                        cancelLongPress();
+                    };
+                    
+                    // 터치 이벤트 (모바일 지원)
+                    eventElement.ontouchstart = (e) => {
+                        e.preventDefault();
+                        startLongPress(eventElement, event);
+                    };
+                    
+                    eventElement.ontouchend = (e) => {
+                        e.preventDefault();
+                        cancelLongPress();
+                    };
+                    
+                    eventElement.ontouchcancel = () => {
+                        cancelLongPress();
+                    };
+                    
+                    dayElement.appendChild(eventElement);
+                });
+            }
+            
+            return dayElement;
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        function showEventDetails(event) {
+            // 일반 클릭 시 수정 모드로만 이동
+            editEvent(event.id);
+        }
+
+        // 길게 누르기 감지 변수들
+        let longPressTimer = null;
+        let isLongPress = false;
+        let currentLongPressEvent = null;
+
+        // 길게 누르기 시작
+        function startLongPress(event, eventObj) {
+            isLongPress = false;
+            currentLongPressEvent = eventObj;
+            
+            longPressTimer = setTimeout(() => {
+                isLongPress = true;
+                showDeleteButton(event, eventObj);
+            }, 800); // 800ms 길게 누르기
+        }
+
+        // 길게 누르기 취소
+        function cancelLongPress() {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            hideDeleteButton();
+        }
+
+        // 삭제 버튼 표시
+        function showDeleteButton(eventElement, eventObj) {
+            // 기존 삭제 버튼들 숨기기
+            hideDeleteButton();
+            
+            // 삭제 버튼 생성
+            const deleteBtn = document.createElement('div');
+            deleteBtn.className = 'event-delete-btn';
+            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                deleteEvent(eventObj.id);
+                hideDeleteButton();
+            };
+            
+            // 이벤트 요소에 삭제 버튼 추가
+            eventElement.appendChild(deleteBtn);
+            eventElement.classList.add('long-pressed');
+            
+            console.log('🔄 길게 누르기 감지 - 삭제 버튼 표시:', eventObj.title);
+        }
+
+        // 삭제 버튼 숨기기
+        function hideDeleteButton() {
+            const deleteButtons = document.querySelectorAll('.event-delete-btn');
+            deleteButtons.forEach(btn => btn.remove());
+            
+            const longPressedEvents = document.querySelectorAll('.event-item.long-pressed');
+            longPressedEvents.forEach(event => event.classList.remove('long-pressed'));
+        }
+
+        // 일정 삭제 함수 (확인 없이 바로 삭제)
+        async function deleteEvent(eventId) {
+            try {
+                console.log('🗑️ 일정 삭제 시작:', eventId);
+                
+                // 삭제할 일정 찾기
+                const eventIndex = events.findIndex(e => e.id === eventId);
+                if (eventIndex === -1) {
+                    alert('삭제할 일정을 찾을 수 없습니다.');
+                    return;
+                }
+                
+                const deletedEvent = events[eventIndex];
+                console.log('🗑️ 삭제할 일정:', deletedEvent);
+                
+                // 배열에서 제거
+                events.splice(eventIndex, 1);
+                console.log('✅ 일정 배열에서 제거됨. 남은 일정 수:', events.length);
+                
+                // 데이터 저장
+                await saveData();
+                console.log('💾 데이터 저장 완료');
+                
+                // 캘린더 새로고침
+                if (document.getElementById('schedulePage').classList.contains('active')) {
+                    renderCalendar();
+                }
+                
+                showSyncStatus(`"${deletedEvent.title}" 삭제됨`, 'success');
+                console.log('🎉 일정 삭제 완료!');
+                
+            } catch (error) {
+                console.error('❌ 일정 삭제 중 오류:', error);
+                alert('일정 삭제 중 오류가 발생했습니다: ' + error.message);
+                showSyncStatus('일정 삭제 실패', 'error');
+            }
+        }
+
+        // 일정 수정 함수
+        function editEvent(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) {
+                alert('수정할 일정을 찾을 수 없습니다.');
+                return;
+            }
+            
+            console.log('✏️ 일정 수정 시작:', event);
+            
+            // 전역 변수로 현재 수정 중인 일정 ID 저장
+            window.editingEventId = eventId;
+            
+            // 일정 모달을 수정 모드로 열기
+            document.getElementById('eventModal').classList.add('active');
+            
+            // 모달 제목 변경
+            document.querySelector('#eventModal .modal-title').textContent = '일정 수정';
+            document.getElementById('eventSubmitBtn').textContent = '수정 완료';
+            
+            // 기존 데이터를 폼에 채우기
+            document.getElementById('eventTitle').value = event.title;
+            document.getElementById('eventDate').value = event.date;
+            document.getElementById('eventCategory').value = event.category;
+            document.getElementById('eventDescription').value = event.description || '';
+            
+            clearEventFormErrors();
+        }
+
+        // 일정 추가 모달
+        function openEventModal() {
+            document.getElementById('eventModal').classList.add('active');
+            document.getElementById('eventDate').value = new Date().toISOString().split('T')[0];
+            clearEventFormErrors();
+        }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').classList.remove('active');
+            clearEventFormErrors();
+            
+            // 수정 모드 해제
+            window.editingEventId = null;
+            document.querySelector('#eventModal .modal-title').textContent = '일정 추가';
+            document.getElementById('eventSubmitBtn').textContent = '추가';
+        }
+
+        // 일정 추가/수정 직접 처리 함수
+        async function handleEventSubmit() {
+            const isEditMode = window.editingEventId != null;
+            console.log(isEditMode ? '✏️ 일정 수정 제출 시작...' : '🚀 일정 추가 제출 시작...');
+            
+            try {
+                // 폼 요소들 직접 확인
+                const titleEl = document.getElementById('eventTitle');
+                const dateEl = document.getElementById('eventDate');
+                const categoryEl = document.getElementById('eventCategory');
+                const descEl = document.getElementById('eventDescription');
+                
+                if (!titleEl || !dateEl || !categoryEl) {
+                    console.error('❌ 필수 폼 요소를 찾을 수 없습니다');
+                    alert('폼 요소를 찾을 수 없습니다. 페이지를 새로고침해주세요.');
+                    return;
+                }
+                
+                const title = titleEl.value.trim();
+                const date = dateEl.value;
+                const category = categoryEl.value;
+                const description = descEl ? descEl.value.trim() : '';
+                
+                console.log('📋 입력된 값들:', {
+                    title: `"${title}"`,
+                    date: `"${date}"`,
+                    category: `"${category}"`,
+                    description: `"${description}"`,
+                    isEditMode: isEditMode
+                });
+                
+                // 필수 필드 검증
+                if (!title) {
+                    alert('일정 제목을 입력해주세요.');
+                    titleEl.focus();
+                    return;
+                }
+                
+                if (!date) {
+                    alert('날짜를 선택해주세요.');
+                    dateEl.focus();
+                    return;
+                }
+                
+                if (!category) {
+                    alert('카테고리를 선택해주세요.');
+                    categoryEl.focus();
+                    return;
+                }
+                
+                console.log('✅ 유효성 검사 통과');
+                
+                if (isEditMode) {
+                    // 수정 모드
+                    const eventIndex = events.findIndex(e => e.id === window.editingEventId);
+                    if (eventIndex === -1) {
+                        alert('수정할 일정을 찾을 수 없습니다.');
+                        return;
+                    }
+                    
+                    const existingEvent = events[eventIndex];
+                    console.log('📝 기존 일정:', existingEvent);
+                    
+                    // 기존 일정 업데이트
+                    events[eventIndex] = {
+                        ...existingEvent,
+                        title: title,
+                        date: date,
+                        category: category,
+                        description: description
+                    };
+                    
+                    console.log('✏️ 일정 수정 완료:', events[eventIndex]);
+                    showSyncStatus('일정 수정 중...', 'success');
+                    
+                } else {
+                    // 새 일정 추가 모드
+                    const newEvent = {
+                        id: Date.now(),
+                        title: title,
+                        date: date,
+                        category: category,
+                        description: description
+                    };
+                    
+                    console.log('🆕 새 이벤트 생성:', newEvent);
+                    events.push(newEvent);
+                    showSyncStatus('일정 저장 중...', 'success');
+                }
+                
+                console.log('📊 현재 이벤트 수:', events.length);
+                
+                // 데이터 저장
+                await saveData();
+                console.log('💾 데이터 저장 완료');
+                
+                // 모달 닫기
+                closeEventModal();
+                
+                // 캘린더 새로고침
+                if (document.getElementById('schedulePage').classList.contains('active')) {
+                    console.log('📅 캘린더 다시 렌더링');
+                    renderCalendar();
+                }
+                
+                // 성공 메시지
+                const action = isEditMode ? '수정' : '추가';
+                showSyncStatus(`일정이 ${action}되었습니다! 📅`, 'success');
+                
+                setTimeout(() => {
+                    alert(`"${title}" 일정이 성공적으로 ${action}되었습니다!\n총 ${events.length}개의 일정이 있습니다. 📅`);
+                }, 500);
+                
+                // 폼 리셋
+                document.getElementById('eventForm').reset();
+                
+                console.log(`🎉 일정 ${action} 완료!`);
+                
+            } catch (error) {
+                console.error('❌ 일정 처리 중 오류:', error);
+                alert('일정 처리 중 오류가 발생했습니다: ' + error.message);
+                showSyncStatus('일정 처리 실패', 'error');
+            }
+        }
+
+        // 초기화
+        window.addEventListener('load', async function() {
+            console.log('🚀 애플리케이션 시작...');
+            showSyncStatus('데이터 로드 중...', 'success');
+            
+            // 기존 데이터 로드 시도
+            const hasExistingData = await loadAllData();
+            
+            // 기존 데이터가 없으면 샘플 데이터 생성
+            if (!hasExistingData) {
+                console.log('📝 새 사용자 - 샘플 데이터 생성 중...');
+                initSampleData();
+                await saveData(); // 샘플 데이터 저장
+                showSyncStatus('초기 데이터 생성됨', 'success');
+            } else {
+                showSyncStatus('기존 데이터 로드됨', 'success');
+            }
+            
+            // 중요: 업로드 관련 초기화
+            console.log('🔧 업로드 기능 초기화 중...');
+            initFileUpload();
+            initUploadForm();
+            // initEventForm(); 제거 - 직접 onclick 사용
+            
+            // 페이지 네비게이션
+            navigateToPage('home');
+            
+            // 실시간 동기화 시작
+            db.startRealTimeSync();
+            
+            // 디버깅용 전역 함수 추가
+            window.clearClassData = () => db.clearAllData();
+            window.showClassData = () => {
+                console.log('현재 저장된 데이터:', {
+                    materials: materials.length,
+                    events: events.length,
+                    comments: comments.length,
+                    likes: likedMaterials.length
+                });
+            };
+            window.testUpload = () => {
+                console.log('업로드 테스트 시작...');
+                openUploadModal();
+            };
+            window.debugUpload = () => {
+                console.log('=== 업로드 디버깅 정보 ===');
+                console.log('폼 요소:', document.getElementById('uploadForm'));
+                console.log('제출 버튼:', document.getElementById('uploadSubmitBtn'));
+                console.log('선택된 파일:', selectedFiles);
+                console.log('현재 자료 수:', materials.length);
+                
+                // 폼 데이터 확인
+                const title = document.getElementById('materialTitle')?.value;
+                const author = document.getElementById('materialAuthor')?.value;
+                const subject = document.getElementById('materialSubject')?.value;
+                console.log('현재 폼 데이터:', { title, author, subject });
+            };
+            
+            // 일정 디버깅 함수 추가
+            window.debugEvent = () => {
+                console.log('=== 일정 디버깅 정보 ===');
+                const form = document.getElementById('eventForm');
+                const title = document.getElementById('eventTitle');
+                const date = document.getElementById('eventDate');
+                const category = document.getElementById('eventCategory');
+                
+                console.log('폼 요소:', form);
+                console.log('제목 요소:', title);
+                console.log('현재 입력값들:', {
+                    title: title?.value,
+                    titleTrimmed: title?.value?.trim(),
+                    date: date?.value,
+                    category: category?.value
+                });
+                console.log('현재 이벤트 수:', events.length);
+            };
+            
+            window.testEventAdd = () => {
+                console.log('일정 추가 강제 테스트...');
+                const testEvent = {
+                    id: Date.now(),
+                    title: '테스트 일정',
+                    date: '2025-08-16',
+                    category: 'school',
+                    description: '테스트용 일정입니다'
+                };
+                events.push(testEvent);
+                console.log('테스트 일정 추가됨:', testEvent);
+                console.log('총 일정 수:', events.length);
+                if (document.getElementById('schedulePage').classList.contains('active')) {
+                    renderCalendar();
+                }
+            };
+            
+            window.testDelete = () => {
+                console.log('=== 삭제 기능 테스트 ===');
+                console.log('현재 자료 수:', materials.length);
+                console.log('현재 일정 수:', events.length);
+                console.log('📚 자료 삭제: 🗑️ 버튼 클릭');
+                console.log('📅 일정 삭제: 일정을 0.8초 길게 누른 후 🗑️ 버튼 클릭');
+                if (materials.length > 0) {
+                    console.log('첫 번째 자료 ID:', materials[0].id);
+                }
+                if (events.length > 0) {
+                    console.log('첫 번째 일정 ID:', events[0].id);
+                }
+            };
+            
+            console.log('✅ 애플리케이션 초기화 완료');
+            console.log('💡 브라우저 콘솔 명령어:');
+            console.log('   - clearClassData(): 모든 데이터 초기화');
+            console.log('   - showClassData(): 현재 데이터 확인'); 
+            console.log('   - testUpload(): 업로드 모달 테스트');
+            console.log('   - debugUpload(): 업로드 상태 디버깅');
+            console.log('   - testEventAdd(): 테스트 일정 추가');
+            console.log('   - testDelete(): 삭제 기능 사용법 안내');
+            console.log('');
+            console.log('🎯 사용법:');
+            console.log('   📚 자료 수정: ✏️ 버튼 클릭');
+            console.log('   📚 자료 삭제: 🗑️ 버튼 클릭');
+            console.log('   📅 일정 수정: 일정 클릭');
+            console.log('   📅 일정 삭제: 일정을 길게 누른 후 🗑️ 버튼 클릭');
+        });
+    </script>
+</body>
+</html>
